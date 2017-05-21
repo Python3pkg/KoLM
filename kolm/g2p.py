@@ -55,11 +55,11 @@ def readfileUTF8(fname):
 
         for line in f:
             if sys.version_info[0] == 2:
-                line = unicode(line.encode("utf-8"))
+                line = str(line.encode("utf-8"))
             else:
                 line = line.encode("utf-8")
-            line = re.sub(u'\n', u'', line)
-            if line != u'':
+            line = re.sub('\n', '', line)
+            if line != '':
                 corpus.append(line)
     return corpus
 
@@ -77,19 +77,19 @@ def readRules(pver, rulebook):
 
         for line in f:
             if pver == 2:
-                line = unicode(line.encode("utf-8"))
-                line = re.sub(u'\n', u'', line)
+                line = str(line.encode("utf-8"))
+                line = re.sub('\n', '', line)
             elif pver == 3:
                 line = re.sub('\n', '', line)
 
-            if line != u'':
-                if line[0] != u'#':
+            if line != '':
+                if line[0] != '#':
                     IOlist = line.split('\t')
                     rule_in.append(IOlist[0])
                     if IOlist[1]:
                         rule_out.append(IOlist[1])
                     else:   # If output is empty (i.e. deletion rule)
-                        rule_out.append(u'')
+                        rule_out.append('')
 
     return rule_in, rule_out
 
@@ -195,16 +195,16 @@ def addPhoneBoundary(phones):
     ipos = 0
     newphones = ''
     while ipos + 2 <= len(phones):
-        if phones[ipos] == u'-':
+        if phones[ipos] == '-':
             newphones = newphones + phones[ipos]
             ipos += 1
-        elif phones[ipos] == u' ':
+        elif phones[ipos] == ' ':
             ipos += 1
-        elif phones[ipos] == u'#':
+        elif phones[ipos] == '#':
             newphones = newphones + phones[ipos]
             ipos += 1
 
-        newphones = newphones + phones[ipos] + phones[ipos+1] + u','
+        newphones = newphones + phones[ipos] + phones[ipos+1] + ','
         ipos += 2
 
     return newphones
@@ -229,37 +229,37 @@ def graph2prono(graphs, rule_in, rule_out):
     romanized_bd = addPhoneBoundary(romanized)
     prono = phone2prono(romanized_bd, rule_in, rule_out)
 
-    prono = re.sub(u',', u' ', prono)
-    prono = re.sub(u' $', u'', prono)
-    prono = re.sub(u'#', u'-', prono)
-    prono = re.sub(u'-+', u'-', prono)
+    prono = re.sub(',', ' ', prono)
+    prono = re.sub(' $', '', prono)
+    prono = re.sub('#', '-', prono)
+    prono = re.sub('-+', '-', prono)
 
     prono_prev = prono
     identical = False
     loop_cnt = 1
 
     if verbose is True:
-        print ('=> Romanized: ' + romanized)
-        print ('=> Romanized with boundaries: ' + romanized_bd)
-        print ('=> Initial output: ' + prono)
+        print(('=> Romanized: ' + romanized))
+        print(('=> Romanized with boundaries: ' + romanized_bd))
+        print(('=> Initial output: ' + prono))
 
     while not identical:
-        prono_new = phone2prono(re.sub(u' ', u',', prono_prev + u','), rule_in, rule_out)
-        prono_new = re.sub(u',', u' ', prono_new)
-        prono_new = re.sub(u' $', u'', prono_new)
+        prono_new = phone2prono(re.sub(' ', ',', prono_prev + ','), rule_in, rule_out)
+        prono_new = re.sub(',', ' ', prono_new)
+        prono_new = re.sub(' $', '', prono_new)
 
-        if re.sub(u'-', u'', prono_prev) == re.sub(u'-', u'', prono_new):
+        if re.sub('-', '', prono_prev) == re.sub('-', '', prono_new):
             identical = True
-            prono_new = re.sub(u'-', u'', prono_new)
+            prono_new = re.sub('-', '', prono_new)
             if verbose is True:
                 print('\n=> Exhaustive rule application completed!')
-                print('=> Total loop count: ' + str(loop_cnt))
-                print('=> Output: ' + prono_new)
+                print(('=> Total loop count: ' + str(loop_cnt)))
+                print(('=> Output: ' + prono_new))
         else:
             if verbose is True:
                 print('\n=> Rule applied for more than once')
-                print('cmp1: ' + re.sub(u'-', u'', prono_prev))
-                print('cmp2: ' + re.sub(u'-', u'', prono_new))
+                print(('cmp1: ' + re.sub('-', '', prono_prev)))
+                print(('cmp2: ' + re.sub('-', '', prono_new)))
             loop_cnt += 1
             prono_prev = prono_new
 
@@ -271,30 +271,30 @@ def testG2P(rulebook, testset):
     cnt = 0
     body = []
     for idx in range(0, len(testin)):
-        print('Test item #: ' + str(idx+1) + '/' + str(len(testin)))
+        print(('Test item #: ' + str(idx+1) + '/' + str(len(testin))))
         item_in = testin[idx]
         item_out = testout[idx]
         ans = graph2phone(item_out)
-        ans = re.sub(u'-', u'', ans)
+        ans = re.sub('-', '', ans)
         ans = addSpace(ans)
 
         [rule_in, rule_out] = readRules(ver_info[0], rulebook)
         pred = graph2prono(item_in, rule_in, rule_out)
 
         if pred != ans:
-            print('G2P ERROR:  [result] ' + pred + '\t\t\t[ans] ' + item_in + ' [' + item_out + '] ' + ans)
+            print(('G2P ERROR:  [result] ' + pred + '\t\t\t[ans] ' + item_in + ' [' + item_out + '] ' + ans))
             cnt += 1
         else:
             body.append('[result] ' + pred + '\t\t\t[ans] ' + item_in + ' [' + item_out + '] ' + ans)
 
-    print('Total error item #: ' + str(cnt))
+    print(('Total error item #: ' + str(cnt)))
     writefile(body, 'good.txt')
 
 
 def runKoG2P(graph, rulebook):
     [rule_in, rule_out] = readRules(ver_info[0], rulebook)
     if ver_info[0] == 2:
-        prono = graph2prono(unicode(graph), rule_in, rule_out)
+        prono = graph2prono(str(graph), rule_in, rule_out)
     elif ver_info[0] == 3:
         prono = graph2prono(graph, rule_in, rule_out)
 
@@ -309,7 +309,7 @@ def runTest(rulebook, testset):
 
     end = dt.datetime.now()
     print('Total time: ')
-    print(end - beg)
+    print((end - beg))
 
 
 # Usage:

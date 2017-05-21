@@ -87,22 +87,22 @@ def tightenString(corpus):
     body = []  # init body
     for line in corpus:
         # Remove initial/final spaces surrounding given string
-        line = re.sub(u'^\s+', u'', line)
-        line = re.sub(u'\s+$', u'', line)
+        line = re.sub('^\s+', '', line)
+        line = re.sub('\s+$', '', line)
 
         # Remove spaces before sentence final punctuations
-        line = re.sub(u'\s+\.', u'.', line)
-        line = re.sub(u'\s+\!', u'!', line)
-        line = re.sub(u'\s+\?', u'?', line)
+        line = re.sub('\s+\.', '.', line)
+        line = re.sub('\s+\!', '!', line)
+        line = re.sub('\s+\?', '?', line)
 
         # Replace multiple spaces with a single space
-        line = re.sub(u'[ \t]+', u' ', line)
-        line = re.sub(u'^\n$', u'', line)
+        line = re.sub('[ \t]+', ' ', line)
+        line = re.sub('^\n$', '', line)
 
         if not line.isspace():  # Space check
             if line:  # Emptiness check
                 if ver_info[0] == 2:
-                    body.append(unicode(line))
+                    body.append(str(line))
                 else:
                     body.append(line)
 
@@ -163,8 +163,8 @@ def removeHeader(headeredfname):
             noheadertxt.write("{}\n".format(trimmed))
         noheadertxt.close()
 
-    print("original line of text length: " + str(total_count))
-    print("Trimmed line of text length: " + str(len(body)))
+    print(("original line of text length: " + str(total_count)))
+    print(("Trimmed line of text length: " + str(len(body))))
 
 
 def readfileUTF8(fname):
@@ -173,11 +173,11 @@ def readfileUTF8(fname):
 
         for line in f:
             if ver_info[0] == 2:
-                line = unicode(line.encode("utf-8"))
-                line = re.sub(u'\n', u'', line)
+                line = str(line.encode("utf-8"))
+                line = re.sub('\n', '', line)
             elif ver_info[0] == 3:
                 line = re.sub('\n', '', line)
-            if line != u'':
+            if line != '':
                 corpus.append(line)
 
     return corpus

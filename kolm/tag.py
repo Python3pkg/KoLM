@@ -76,8 +76,8 @@ def concatNouns(eojeol_list):
         for eoj_id in range(0, len(eojeol_list)):
             eoj = eojeol_list[eoj_id]
 
-            morph = re.finditer(u'[ㄱ-힣]+', eoj)
-            pos = re.finditer(u'[A-Z]+', eoj)
+            morph = re.finditer('[ㄱ-힣]+', eoj)
+            pos = re.finditer('[A-Z]+', eoj)
 
             idxlist_morph = getStrIndices(morph, eoj)
             idxlist_pos = getStrIndices(pos, eoj)
@@ -85,7 +85,7 @@ def concatNouns(eojeol_list):
             idx = 0
             seq = ''
             end_unreached = True
-            noun = re.compile(u'(NNG|NNP|NNB|NR|NP|XPN|XSN)')
+            noun = re.compile('(NNG|NNP|NNB|NR|NP|XPN|XSN)')
 
             while end_unreached:
 
@@ -115,7 +115,7 @@ def concatNouns(eojeol_list):
                             else:  # NOUN sequence ends
                                 continuity = False
                                 # print('END!')
-                                seq = seq + u'+' + idxlist_morph[idx][1]
+                                seq = seq + '+' + idxlist_morph[idx][1]
                                 end_idx = idx - 1
 
                                 if idx < len(idxlist_pos) - 1:  # Endpoint not reached yet
@@ -208,10 +208,10 @@ def pseudomicro(raw, morphed):
             same_check_value = sameCheck(raw[index_i], morphed[index_j])  # 유사도 계산 (0~3)
 
             if same_check_value >= 2:  # 유사도 2 이상이므로 결과에 포함
-                if raw[index_i] != u"'":  # '가 아닌 경우에만 플러스 처리를 한다. 약간 ad-hoc
+                if raw[index_i] != "'":  # '가 아닌 경우에만 플러스 처리를 한다. 약간 ad-hoc
                     if len(carry_buffer) > 0:  # carry 에 데이터가 남아있고, +를 포함하고 있으면
-                        if u'+' in carry_buffer:
-                            result_buffer.append(u'+')
+                        if '+' in carry_buffer:
+                            result_buffer.append('+')
                         carry_buffer = []
                 result_buffer.append(raw[index_i])
                 index_i += 1
@@ -227,8 +227,8 @@ def pseudomicro(raw, morphed):
 
                         if second_same_check_value >= 1:  # 나머지 유사도 1을 찾음
                             if len(carry_buffer) > 0:  # carry 에 데이타가 남아있고, +를 포함하고 있으면
-                                if u'+' in carry_buffer:
-                                    result_buffer.append(u'+')
+                                if '+' in carry_buffer:
+                                    result_buffer.append('+')
                                 carry_buffer = []
                             result_buffer.append(raw[index_i])
                             index_i += 1
@@ -247,8 +247,8 @@ def pseudomicro(raw, morphed):
 
             if index_j >= len(morphed):  # 종료 확인
                 if len(carry_buffer) > 0:
-                    if u'+' in carry_buffer:
-                        result_buffer.append(u'+')
+                    if '+' in carry_buffer:
+                        result_buffer.append('+')
                     result_buffer.append(raw[index_i])
                 is_loop = False
     except:
@@ -262,8 +262,8 @@ def pseudomedium(raw_sentlist, morph_sentlist):
 
     pseudo_intermediate = []
     for sent_id in range(0, len(morph_sentlist)):
-        print('sentence #: ' + str(sent_id))
-        sent = re.sub(u'[_/\d]', '', morph_sentlist[sent_id])
+        print(('sentence #: ' + str(sent_id)))
+        sent = re.sub('[_/\d]', '', morph_sentlist[sent_id])
         morph_eojeol_sentlist = sent.split(' ')
 
         output = concatNouns(morph_eojeol_sentlist)
@@ -274,7 +274,7 @@ def pseudomedium(raw_sentlist, morph_sentlist):
     # For each sentence in input list
     out_medium = []
     for sentIdx in range(0, len(eojeol_sentlist)):
-        print('sentence #: ' + str(sentIdx))
+        print(('sentence #: ' + str(sentIdx)))
         eoj = eojeol_sentlist[sentIdx]
         pseu = pseudo_intermediate[sentIdx]
 
@@ -309,8 +309,8 @@ def morph2pseudo(raw_sentlist, morph_sentlist, type):
     elif type == 'micro':
         pseudo_intermediate = []
         for sent_id in range(0, len(morph_sentlist)):
-            sent = re.sub(u'[_/\dA-Z]', '', morph_sentlist[sent_id])
-            morph_eojeol_sentlist = sent.split(u' ')
+            sent = re.sub('[_/\dA-Z]', '', morph_sentlist[sent_id])
+            morph_eojeol_sentlist = sent.split(' ')
             pseudo_intermediate.append(morph_eojeol_sentlist)
 
         eojeol_sentlist = getEojeolList(raw_sentlist)
@@ -318,18 +318,18 @@ def morph2pseudo(raw_sentlist, morph_sentlist, type):
         # For each sentence in input list
         out_micro = []
         for sentIdx in range(0, len(eojeol_sentlist)):
-            print('sentence #: ' + str(sentIdx))
+            print(('sentence #: ' + str(sentIdx)))
             eoj = eojeol_sentlist[sentIdx]
             pseu = pseudo_intermediate[sentIdx]
 
             # For each item in input sentence(s)
-            pseudo_sent = u''
+            pseudo_sent = ''
             for itemIdx in range(0, len(eoj)):
                 e = eoj[itemIdx]
                 p = pseu[itemIdx]
 
                 pseudo_item = pseudomicro(e, p)
-                pseudo_sent = pseudo_sent + u' ' + pseudo_item
+                pseudo_sent = pseudo_sent + ' ' + pseudo_item
 
             out_micro.append(pseudo_sent)
 

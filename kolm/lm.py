@@ -44,7 +44,7 @@ def boundary2space(corpus):
     # Morpheme-boundaries into spaces
     body = []
     for lines in corpus:
-        lines = re.sub(u'\+', u' ', lines)
+        lines = re.sub('\+', ' ', lines)
         body.append(lines)
     return body
 
@@ -62,13 +62,13 @@ def getUniqueWords(text_fname):
     uqlist = []
     idx = 0
     for line in corpus:
-        print('line #: ' + str(idx))
+        print(('line #: ' + str(idx)))
         wordlist = line.split()
         for word in wordlist:
             if not word.isspace():  # Space check
                 if word:  # Emptiness check
                     if sys.version_info[0] == 2:
-                        uqlist.append(unicode(word))
+                        uqlist.append(str(word))
                     else:
                         uqlist.append(word)
         idx += 1
@@ -82,16 +82,16 @@ def writeLexicon(text_fname):
     lexicon = []
     idx = 0
     for graph in uqlist:
-        print('line #: ' + str(idx))
+        print(('line #: ' + str(idx)))
         try:
             if ver_info[0] == 2:
-                prono = g2p.graph2prono(unicode(graph), rule_in, rule_out)
+                prono = g2p.graph2prono(str(graph), rule_in, rule_out)
             elif ver_info[0] == 3:
                 prono = g2p.graph2prono(graph, rule_in, rule_out)
 
             lexicon.append(graph + ' ' + prono)
         except:
-            print('Error: ' + graph)
+            print(('Error: ' + graph))
 
         idx += 1
 

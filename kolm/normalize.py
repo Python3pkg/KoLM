@@ -38,29 +38,29 @@ def bySentence(corpus):
     body = []  # init body
     for line in corpus:
         # Map '…' into '.'
-        line = re.sub('…', u'.', line)
+        line = re.sub('…', '.', line)
         # [Note] Do NOT put 'u' before '…'. Unicode doesn't work in this case.
 
         # Delete periods included in initial letter sequences
-        line = re.sub(u'(?<=\.[A-Z])\.', u'', line)
-        line = re.sub(u'(?<=[A-Z])\.(?=[A-Z])', u'', line)
+        line = re.sub('(?<=\.[A-Z])\.', '', line)
+        line = re.sub('(?<=[A-Z])\.(?=[A-Z])', '', line)
 
         # Clean up multiple punctuations (ex: 'Hi!!!' -> 'Hi!')
-        line = re.sub(u'\.+', u'.', line)
-        line = re.sub(u'\?+', u'?', line)
-        line = re.sub(u'\!+', u'!', line)
+        line = re.sub('\.+', '.', line)
+        line = re.sub('\?+', '?', line)
+        line = re.sub('\!+', '!', line)
 
         # Split by sentence final punctuation marks
         # (i.e. period '.', question mark '?', exclamation mark '!')
-        line = re.sub(u'(?<=[\.\?\!])[ \,]', u'\n', line)  # Space/comma after punctuations '.', '!', '?'
-        line = re.sub(u'(?<=[가-힣])[\.\?\!](?=[가-힣])', u'.\n', line)  # Punctuations with no space afterwards
+        line = re.sub('(?<=[\.\?\!])[ \,]', '\n', line)  # Space/comma after punctuations '.', '!', '?'
+        line = re.sub('(?<=[가-힣])[\.\?\!](?=[가-힣])', '.\n', line)  # Punctuations with no space afterwards
         line = line.splitlines()
 
         for shorterline in line:
             if not shorterline.isspace():  # Space check
                 if shorterline:  # Emptiness check
                     if sys.version_info[0] == 2:
-                        body.append(unicode(shorterline))
+                        body.append(str(shorterline))
                     else:
                         body.append(shorterline)
 
@@ -71,34 +71,34 @@ def normalize(corpus):
     body = []  # init body
     for line in corpus:
         # Number deletion
-        line = re.sub(u'^\s*[\(\[<〈《【〔]*\s*\d+[\)\.\]>〉》】〕](?=\D+)', u'', line)
+        line = re.sub('^\s*[\(\[<〈《【〔]*\s*\d+[\)\.\]>〉》】〕](?=\D+)', '', line)
 
         # Number reading
         line = readNumber(line)
 
         # Deletion
-        line = re.sub(u'(\(예:.*?\)|\[예:.*?\]|^[ \t]*예:.*?)', u'', line)  # examples
-        line = re.sub(u'^\s*[\(\[<〈《【〔]*\s*[ㄱ-ㅎ가-힣][\)\]>〉》】〕]\s*(?=[가-힣]*)', u'', line)  # ordered bullets
-        line = re.sub(u'\([^\)]*[^\)]+\)', u'', line)  # Everything within parentheses '()'
+        line = re.sub('(\(예:.*?\)|\[예:.*?\]|^[ \t]*예:.*?)', '', line)  # examples
+        line = re.sub('^\s*[\(\[<〈《【〔]*\s*[ㄱ-ㅎ가-힣][\)\]>〉》】〕]\s*(?=[가-힣]*)', '', line)  # ordered bullets
+        line = re.sub('\([^\)]*[^\)]+\)', '', line)  # Everything within parentheses '()'
         line = re.sub(
-            u'(file://|gopher://|news://|nntp://|telnet://|https?://|ftps?://|sftp://|www\.)([a-z0-9-]+\.)+[a-z0-9]{2,4}[^ㄱ-힣\)\]\.\,\'\"\s]*''',
-            u'', line)  # web address
-        line = re.sub(u'[ㅡ-]*', u'', line)  # dashes
-        line = re.sub(u'[\`\'\"＂‘’“”]*', u'', line)  # quotations
-        line = re.sub(u'【.*?기자[ \t]*】', u'', line)  # reporter's name
-        line = re.sub(u'〔.*?〕', u'', line)  # book's title as reference
-        line = re.sub(u'[\[〈〉《》「」『』{}\]]*', u'', line)  # brackets
-        line = re.sub(u'(\w+[\w\.]*)@(\w+[\w\.]*)\.([A-Za-z]+)', u'', line)  # email address
-        line = re.sub(u'\#', u'', line)  # sharp
-        line = re.sub(u'(?<=[가-힣])[A-Za-z]+[ ]?[A-Za-z]*', u'', line)  # alphabet references right after hangul
+            '(file://|gopher://|news://|nntp://|telnet://|https?://|ftps?://|sftp://|www\.)([a-z0-9-]+\.)+[a-z0-9]{2,4}[^ㄱ-힣\)\]\.\,\'\"\s]*''',
+            '', line)  # web address
+        line = re.sub('[ㅡ-]*', '', line)  # dashes
+        line = re.sub('[\`\'\"＂‘’“”]*', '', line)  # quotations
+        line = re.sub('【.*?기자[ \t]*】', '', line)  # reporter's name
+        line = re.sub('〔.*?〕', '', line)  # book's title as reference
+        line = re.sub('[\[〈〉《》「」『』{}\]]*', '', line)  # brackets
+        line = re.sub('(\w+[\w\.]*)@(\w+[\w\.]*)\.([A-Za-z]+)', '', line)  # email address
+        line = re.sub('\#', '', line)  # sharp
+        line = re.sub('(?<=[가-힣])[A-Za-z]+[ ]?[A-Za-z]*', '', line)  # alphabet references right after hangul
 
         # Substitution into newline
-        line = re.sub(u'[=:;]', u'\n', line)  # colon ':' or semi-colon ';'
+        line = re.sub('[=:;]', '\n', line)  # colon ':' or semi-colon ';'
 
         # Substitution into whitespace
-        line = re.sub(u'·', u' ', line)  # '·'
-        line = re.sub(u'(?<=[가-힣A-Za-z])~(?=[가-힣A-Za-z]+)', u' ', line)  # tide '~' between words
-        line = re.sub(u'→', u' ', line)  # arrow '→'
+        line = re.sub('·', ' ', line)  # '·'
+        line = re.sub('(?<=[가-힣A-Za-z])~(?=[가-힣A-Za-z]+)', ' ', line)  # tide '~' between words
+        line = re.sub('→', ' ', line)  # arrow '→'
 
         # Hangul jaum (single consonants) reading
         line = readHangulLetter(line)
@@ -118,7 +118,7 @@ def normalize(corpus):
         if not line.isspace():  # Space check
             if line:  # Emptiness check
                 if sys.version_info[0] == 2:
-                    body.append(unicode(line))
+                    body.append(str(line))
                 else:
                     body.append(line)
 
@@ -128,7 +128,7 @@ def normalize(corpus):
 def readNumber(line):
     numlist = []
 
-    for numiter in re.finditer(u'([+-]?\d+)[\.]?\d*', line):
+    for numiter in re.finditer('([+-]?\d+)[\.]?\d*', line):
         numlist.append(numiter.group())
 
     if len(numlist) > 0:
@@ -137,7 +137,7 @@ def readNumber(line):
             numidx = []
             numlist = []
 
-            for numiter_fresh in re.finditer(u'([+-]?\d+)[\.]?\d*', line):
+            for numiter_fresh in re.finditer('([+-]?\d+)[\.]?\d*', line):
                 numidx.append(numiter_fresh.span())
                 numlist.append(numiter_fresh.group())
 
@@ -147,28 +147,28 @@ def readNumber(line):
 
             if re.search('\.', num) is None:
                 # [Case 1] Integer
-                numint = re.search(u'\d+', num).group()
+                numint = re.search('\d+', num).group()
                 numint = NumberWord(int(numint)).read()
-                num = re.sub(u'\d+', numint, num)
+                num = re.sub('\d+', numint, num)
 
             else:  # [Case 2] Floating number
                 # Read integer part first
-                numint = re.search(u'\d+(?=\.)', num).group()
+                numint = re.search('\d+(?=\.)', num).group()
                 numint = NumberWord(int(numint)).read()
-                num = re.sub(u'\d+(?=\.)', numint, num)
+                num = re.sub('\d+(?=\.)', numint, num)
 
                 # Read floating points
-                num = re.sub(u'\.', u'점', num)
-                num = re.sub(u'0', u'영', num)
-                num = re.sub(u'1', u'일', num)
-                num = re.sub(u'2', u'이', num)
-                num = re.sub(u'3', u'삼', num)
-                num = re.sub(u'4', u'사', num)
-                num = re.sub(u'5', u'오', num)
-                num = re.sub(u'6', u'육', num)
-                num = re.sub(u'7', u'칠', num)
-                num = re.sub(u'8', u'팔', num)
-                num = re.sub(u'9', u'구', num)
+                num = re.sub('\.', '점', num)
+                num = re.sub('0', '영', num)
+                num = re.sub('1', '일', num)
+                num = re.sub('2', '이', num)
+                num = re.sub('3', '삼', num)
+                num = re.sub('4', '사', num)
+                num = re.sub('5', '오', num)
+                num = re.sub('6', '육', num)
+                num = re.sub('7', '칠', num)
+                num = re.sub('8', '팔', num)
+                num = re.sub('9', '구', num)
 
             ituple = numidx[0]
             numlist[0] = num
@@ -178,9 +178,9 @@ def readNumber(line):
 
 
 def readHanja(line):
-    if re.search(u'[一-龥豈-龎]+', line):
-        if re.search(u'[가-힣]+[一-龥豈-龎]+', line):
-            line = re.sub(u'[一-龥豈-龎]+', u'', line)
+    if re.search('[一-龥豈-龎]+', line):
+        if re.search('[가-힣]+[一-龥豈-龎]+', line):
+            line = re.sub('[一-龥豈-龎]+', '', line)
         else:
             line = hanja.translate(line, 'substitution')
     return line
@@ -189,7 +189,7 @@ def readHanja(line):
 def readABC(line):
     ABClist = []
 
-    for ABCiter in re.finditer(u'[A-Z](?=[^a-z])', line):
+    for ABCiter in re.finditer('[A-Z](?=[^a-z])', line):
         ABClist.append(ABCiter.group())
 
     if len(ABClist) > 0:
@@ -198,7 +198,7 @@ def readABC(line):
             ABCidx = []
             ABClist = []
 
-            for ABCiter_fresh in re.finditer(u'[A-Z](?=[^a-z])', line):
+            for ABCiter_fresh in re.finditer('[A-Z](?=[^a-z])', line):
                 ABCidx.append(ABCiter_fresh.span())
                 ABClist.append(ABCiter_fresh.group())
 
@@ -206,32 +206,32 @@ def readABC(line):
                 ABC = ABClist[0]
                 break
 
-            ABC = re.sub(u'A', u'에이', ABC)
-            ABC = re.sub(u'B', u'비', ABC)
-            ABC = re.sub(u'C', u'씨', ABC)
-            ABC = re.sub(u'D', u'디', ABC)
-            ABC = re.sub(u'E', u'이', ABC)
-            ABC = re.sub(u'F', u'에프', ABC)
-            ABC = re.sub(u'G', u'지', ABC)
-            ABC = re.sub(u'H', u'에이치', ABC)
-            ABC = re.sub(u'I', u'아이', ABC)
-            ABC = re.sub(u'J', u'제이', ABC)
-            ABC = re.sub(u'K', u'케이', ABC)
-            ABC = re.sub(u'L', u'엘', ABC)
-            ABC = re.sub(u'M', u'엠', ABC)
-            ABC = re.sub(u'N', u'엔', ABC)
-            ABC = re.sub(u'O', u'오', ABC)
-            ABC = re.sub(u'P', u'피', ABC)
-            ABC = re.sub(u'Q', u'큐', ABC)
-            ABC = re.sub(u'R', u'알', ABC)
-            ABC = re.sub(u'S', u'에스', ABC)
-            ABC = re.sub(u'T', u'티', ABC)
-            ABC = re.sub(u'U', u'유', ABC)
-            ABC = re.sub(u'V', u'브이', ABC)
-            ABC = re.sub(u'W', u'더블유', ABC)
-            ABC = re.sub(u'X', u'엑스', ABC)
-            ABC = re.sub(u'Y', u'와이', ABC)
-            ABC = re.sub(u'Z', u'지', ABC)
+            ABC = re.sub('A', '에이', ABC)
+            ABC = re.sub('B', '비', ABC)
+            ABC = re.sub('C', '씨', ABC)
+            ABC = re.sub('D', '디', ABC)
+            ABC = re.sub('E', '이', ABC)
+            ABC = re.sub('F', '에프', ABC)
+            ABC = re.sub('G', '지', ABC)
+            ABC = re.sub('H', '에이치', ABC)
+            ABC = re.sub('I', '아이', ABC)
+            ABC = re.sub('J', '제이', ABC)
+            ABC = re.sub('K', '케이', ABC)
+            ABC = re.sub('L', '엘', ABC)
+            ABC = re.sub('M', '엠', ABC)
+            ABC = re.sub('N', '엔', ABC)
+            ABC = re.sub('O', '오', ABC)
+            ABC = re.sub('P', '피', ABC)
+            ABC = re.sub('Q', '큐', ABC)
+            ABC = re.sub('R', '알', ABC)
+            ABC = re.sub('S', '에스', ABC)
+            ABC = re.sub('T', '티', ABC)
+            ABC = re.sub('U', '유', ABC)
+            ABC = re.sub('V', '브이', ABC)
+            ABC = re.sub('W', '더블유', ABC)
+            ABC = re.sub('X', '엑스', ABC)
+            ABC = re.sub('Y', '와이', ABC)
+            ABC = re.sub('Z', '지', ABC)
 
             ituple = ABCidx[0]
             ABClist[0] = ABC
@@ -244,7 +244,7 @@ def readABC(line):
 def readAlphabet(line, lang):
     alphalist = []
 
-    for alphaiter in re.finditer(u'[A-Za-z]+', line):
+    for alphaiter in re.finditer('[A-Za-z]+', line):
         alphalist.append(alphaiter.group())
 
     if len(alphalist) > 0:
@@ -253,7 +253,7 @@ def readAlphabet(line, lang):
             alphaidx = []
             alphalist = []
 
-            for alphaiter_fresh in re.finditer(u'[A-Za-z]+', line):
+            for alphaiter_fresh in re.finditer('[A-Za-z]+', line):
                 alphaidx.append(alphaiter_fresh.span())
                 alphalist.append(alphaiter_fresh.group())
 
@@ -276,28 +276,28 @@ def replaceSubstring(line, newstr, ituple):
 
 
 def removeNonHangul(line):
-    line = re.sub(u'[^가-힣\s]*', u'', line)
+    line = re.sub('[^가-힣\s]*', '', line)
     return line
 
 
 def readHangulLetter(line):
-    line = re.sub(u'ㄱ', u'기역', line)
-    line = re.sub(u'ㄴ', u'니은', line)
-    line = re.sub(u'ㄷ', u'디귿', line)
-    line = re.sub(u'ㄹ', u'리을', line)
-    line = re.sub(u'ㅁ', u'미음', line)
-    line = re.sub(u'ㅂ', u'비읍', line)
-    line = re.sub(u'ㅅ', u'시옷', line)
-    line = re.sub(u'ㅇ', u'이응', line)
-    line = re.sub(u'ㅈ', u'지읒', line)
-    line = re.sub(u'ㅊ', u'치읓', line)
-    line = re.sub(u'ㅎ', u'히읗', line)
+    line = re.sub('ㄱ', '기역', line)
+    line = re.sub('ㄴ', '니은', line)
+    line = re.sub('ㄷ', '디귿', line)
+    line = re.sub('ㄹ', '리을', line)
+    line = re.sub('ㅁ', '미음', line)
+    line = re.sub('ㅂ', '비읍', line)
+    line = re.sub('ㅅ', '시옷', line)
+    line = re.sub('ㅇ', '이응', line)
+    line = re.sub('ㅈ', '지읒', line)
+    line = re.sub('ㅊ', '치읓', line)
+    line = re.sub('ㅎ', '히읗', line)
 
-    line = re.sub(u'ㄲ', u'쌍기역', line)
-    line = re.sub(u'ㄸ', u'쌍디귿', line)
-    line = re.sub(u'ㅃ', u'쌍비읍', line)
-    line = re.sub(u'ㅆ', u'쌍시옷', line)
-    line = re.sub(u'ㅉ', u'쌍지읒', line)
+    line = re.sub('ㄲ', '쌍기역', line)
+    line = re.sub('ㄸ', '쌍디귿', line)
+    line = re.sub('ㅃ', '쌍비읍', line)
+    line = re.sub('ㅆ', '쌍시옷', line)
+    line = re.sub('ㅉ', '쌍지읒', line)
     return line
 
 
@@ -334,10 +334,10 @@ def Knormalize(in_fname, out_fname):
 
 
     end = dt.datetime.now()
-    print(end - beg)
+    print((end - beg))
 
-    print("Original text length by line number: " + str(total_count_original))
-    print("Normalized text length by line number: " + str(len(body)))
+    print(("Original text length by line number: " + str(total_count_original)))
+    print(("Normalized text length by line number: " + str(len(body))))
 
     utils.writefile(body, out_fname)
 
